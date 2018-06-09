@@ -1,0 +1,50 @@
+﻿@using DataModel;
+@using DataModel.PocoClasses;
+@{
+    ViewBag.Title = "Promotions";
+    var weekDay = DateTime.Now.DayOfWeek;
+    var date = DateTime.Now.Day;
+    var month = DateTime.Now.Month;
+}
+
+<h2>Promotions for @weekDay  @date/@month</h2>
+<br />
+<table class="table table-hover table-condensed">
+    <thead>
+        <tr>
+            <th>Poster</th>
+            <th>Movie</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            DataContext context = new DataContext();
+
+            Random random = new Random();
+
+            List<Movie> movieList = (from c in context.Movies select c).ToList();
+
+            for (int i = movieList.Count - 1; i >= movieList.Count - 4; i--)
+            {
+                Movie movie = movieList[i];
+
+                <tr>
+                    <td><a href="@Url.Action("Payment", "Home", new { id = movie.MovieId})"><img height="270" width="170" src="~/Images/@movie.MovieImage" /></a></td>
+                    <td>
+                        <h4 style="font-weight:700;">@movie.MovieName</h4>
+                        <br />
+                        <br />
+                        <p style="padding:5px">
+                            @movie.MovieDescription
+                        </p>
+                    </td>
+                    <td style="width:100px;">
+                        <del>@movie.TicketPrice dkk</del> <br />
+                        @(movie.TicketPrice - random.Next(1, 5) * 5)
+                    </td>
+                </tr>
+                }
+            }
+    </tbody>
+</table>

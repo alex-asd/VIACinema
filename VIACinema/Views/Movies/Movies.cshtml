@@ -1,0 +1,73 @@
+﻿@using DataModel;
+@using DataModel.PocoClasses;
+@{
+    ViewBag.Title = "Movies";
+}
+<h3>@ViewBag.Message</h3>
+
+<table class="table table-hover table-condensed">
+    <thead>
+        <tr>
+            <th>Poster</th>
+            <th>Movie</th>
+            <th>Price</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            DataContext context = new DataContext();
+
+            List<Movie> movieList = (from c in context.Movies select c).ToList();
+
+            for (int i = 0; i < Math.Min(movieList.Count, 7); i++)
+            {
+                Movie movie = movieList[i];
+
+                if (movie.StartTime > DateTime.Now.AddDays(-1))
+                {
+                    <tr>
+                        <td><a href="@Url.Action("Payment", "Home", new { id = movie.MovieId})"><img height="270" width="170" src="~/Images/@movie.MovieImage" /></a></td>
+                        <td>
+                            <h4 style="font-weight:700;">@movie.MovieName</h4>
+                            <br />
+                            <br />
+                            <p style="padding:5px">
+                                @movie.MovieDescription
+                            </p>
+                        </td>
+                        <td style="width:100px;">@movie.TicketPrice dkk</td>
+                    </tr>
+
+                }
+            }
+
+            for (int i = 7; i < movieList.Count; i++)
+            {
+                Movie movie = movieList[i];
+
+                if (movie.StartTime > DateTime.Now.AddDays(-1))
+                {
+                    <tr style="display:none" class="more_movies">
+                        <td><a href="@Url.Action("Payment", "Home", new { id = movie.MovieId})"><img height="270" width="170" src="~/Images/@movie.MovieImage" /></a></td>
+                        <td>
+                            <h4 style="font-weight:700;">@movie.MovieName</h4>
+                            <br />
+                            <br />
+                            <p style="padding:5px">
+                                @movie.MovieDescription
+                            </p>
+                        </td>
+                        <td style="width:100px;">@movie.TicketPrice dkk</td>
+                    </tr>
+
+                }
+            }
+        }
+    </tbody>
+</table>
+
+<script>
+
+</script>
+
+<input id="showMore" type="button" value="Show All Movies" />

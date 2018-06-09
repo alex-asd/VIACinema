@@ -1,0 +1,390 @@
+﻿@using DataModel;
+@using DataModel.PocoClasses;
+
+@{
+    ViewBag.Title = "Home Page";
+
+}
+
+<div class="row">
+    <div class="col-md-12">
+        <div id="myCarousel" class="carousel slide" data-ride="carousel">
+            <ol class="carousel-indicators">
+                @{
+                    initialize(true);
+
+                    VIACinema.ServiceReference1.WebServiceSoapClient client = new VIACinema.ServiceReference1.WebServiceSoapClient();
+
+                    VIACinema.ServiceReference1.CarouselMovie[] carouselMoviesList = client.GetCarouselMovies();
+
+                    bool first_time = true;
+
+                    for (int i = 0; i < carouselMoviesList.Length; i++)
+                    {
+                        if (first_time)
+                        {
+                            <li data-target="#myCarousel" data-slide-to="@i" class="active"></li>
+                        }
+                        else
+                        {
+                            <li data-target="#myCarousel" data-slide-to="@i"></li>
+                        }
+
+                        first_time = false;
+                    }
+                }
+            </ol>
+
+            <div class="carousel-inner" style="width:100%;height:500px;">
+
+                @{
+                    first_time = true;
+
+                    foreach (VIACinema.ServiceReference1.CarouselMovie movie in carouselMoviesList)
+                    {
+                        if (first_time)
+                        {
+                            <div class="item active" id="slide">
+                                <a href="#"><img style="height:100%;width:100%;" src="~/Images/@movie.MovieURL" alt="@movie.MovieDescription" /></a>
+                            </div>
+                        }
+                        else
+                        {
+                            <div class="item" id="slide">
+                                <a href="#"><img style="height:100%;width:100%;" src="~/Images/@movie.MovieURL" alt="@movie.MovieDescription" /></a>
+                            </div>
+
+                        }
+
+                        first_time = false;
+                    }
+                }
+            </div>
+
+            <a class="left carousel-control" href="#myCarousel" data-slide="prev">
+                <span class="glyphicon glyphicon-chevron-left"></span>
+                <span class="sr-only">Previous</span>
+            </a>
+            <a class="right carousel-control" href="#myCarousel" data-slide="next">
+                <span class="glyphicon glyphicon-chevron-right"></span>
+                <span class="sr-only">Next</span>
+            </a>
+        </div>
+    </div>
+</div>
+<br />
+<div class="row">
+    <div class="col-md-12">
+        <h2>IMAX</h2>
+        <div class="row">
+            <div class="col-md-7">
+                <iframe width="560" height="315" src="https://www.youtube.com/embed/nRaWr0A_ruw" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen></iframe>
+            </div>
+            <div class="col-md-5">
+
+                <h3>The IMAX Difference - Bigger is just the Beginning</h3>
+                <br />
+                <h5>
+                    IMAX, an innovator in entertainment technology, combines proprietary software, architecture and equipment to create experiences that take you beyond the edge of your seat to a world you've never imagined. Top filmmakers and studios are utilizing IMAX theatres to connect with audiences in extraordinary ways, and, as such, IMAX's network is among the most important and successful theatrical distribution platforms for major event films around the globe.
+                </h5>
+                <br />
+                <h4>
+                    IMAX IN THEATRES IS AN UNFORGETTABLE EXPERIENCE
+                </h4>
+                <h5>The best way to experience IMAX is simply by watching a movie in VIA Cinema's IMAX.</h5>
+            </div>
+        </div>
+        <p><a class="btn btn-lg btn-default" href="https://en.wikipedia.org/wiki/IMAX">Learn more &raquo;</a></p>
+    </div>
+    <br />
+</div>
+<br />
+<div class="jumbotron bg-orange">
+    <h4 style="font-weight:500">Today's shows ( @DateTime.Now.Day / @DateTime.Now.Month / @DateTime.Now.Year  ) </h4>
+    <br />
+    @{ 
+        DataContext context = new DataContext();
+
+        List<Movie> movies = (from c in context.Movies
+                              where c.StartTime.Day == DateTime.Now.Day &&
+                                  c.StartTime.Month == DateTime.Now.Month &&
+                                  c.StartTime.Year == DateTime.Now.Year
+                              select c).ToList();
+
+        <div class="row">
+            <div class="col-md-3">
+
+                <a href="@Url.Action("Payment", "Home", new { id = movies.Count > 0 ? movies[0].MovieId : -1 })">
+                    @if (movies.Count > 0)
+                    {
+                        <img height="270" width="185" src="~/Images/@movies[0].MovieImage" />
+                        <p class="movie-title" style="font-size:12px; padding-top:3px;">@movies[0].MovieName - @movies[0].StartTime.ToString().Substring(9)</p>
+                     }
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Payment", "Home", new { id = movies.Count > 1 ? movies[1].MovieId : -1 })">
+
+                    @if (movies.Count > 1)
+                    {
+
+                        <img height="270" width="185" src="~/Images/@movies[1].MovieImage" />
+                        <p class="movie-title" style="font-size:12px; padding-top:3px;">@movies[1].MovieName - @movies[1].StartTime.ToString().Substring(9)</p>
+                    }
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Payment", "Home", new { id = movies.Count > 2 ? movies[2].MovieId : -1 })">
+
+                    @if (movies.Count > 2)
+                    {
+
+                        <img height="270" width="185" src="~/Images/@movies[2].MovieImage" />
+                        <p class="movie-title" style="font-size:12px; padding-top:3px;">@movies[2].MovieName - @movies[2].StartTime.ToString().Substring(9)</p>
+                    }
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Payment", "Home", new { id = movies.Count > 3 ? movies[3].MovieId : -1 })">
+
+                    @if (movies.Count > 3)
+                    {
+
+                            <img height="270" width="185" src="~/Images/@movies[3].MovieImage" />
+                            <p class="movie-title" style="font-size:12px; padding-top:3px;">@movies[3].MovieName - @movies[3].StartTime.ToString().Substring(9)</p>
+                    }
+                </a>
+            </div>
+        </div>
+    }
+    <hr />
+    <br />
+    @{
+        DataContext dataContext = new DataContext();
+
+        DateTime tomorrow = DateTime.Now.AddDays(1);
+
+        List<Movie> futMovies = (from c in context.Movies
+                                 where (tomorrow < c.StartTime)
+                                 select c).ToList();
+
+        <div class="row">
+            <div class="col-md-3">
+                <a href="@Url.Action("Payment", "Home", new { id = futMovies.Count > 0 ? futMovies[0].MovieId : -1 })">
+
+                    @if (futMovies.Count > 0)
+                    {
+
+                        <img height="270" width="185" src="~/Images/@futMovies[0].MovieImage" />
+                        <p class="movie-title">@futMovies[0].MovieName - @futMovies[0].StartTime.ToString().Substring(0, 9)</p>
+                    }
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Payment", "Home", new { id = futMovies.Count > 1 ? futMovies[1].MovieId : -1 })">
+
+                    @if (futMovies.Count > 1)
+                    {
+
+                        <img height="270" width="185" src="~/Images/@futMovies[1].MovieImage" />
+                        <p class="movie-title">@futMovies[1].MovieName - @futMovies[1].StartTime.ToString().Substring(0, 9)</p>
+                    }
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Payment", "Home", new { id = futMovies.Count > 2 ? futMovies[2].MovieId : -1 })">
+
+                    @if (futMovies.Count > 2)
+                    {
+
+                        <img height="270" width="185" src="~/Images/@futMovies[2].MovieImage" />
+                        <p class="movie-title">@futMovies[2].MovieName - @futMovies[2].StartTime.ToString().Substring(0, 9)</p>
+                    }
+                </a>
+            </div>
+            <div class="col-md-3">
+                <a href="@Url.Action("Payment", "Home", new { id = futMovies.Count > 3 ? futMovies[3].MovieId : -1 })">
+
+                    @if (futMovies.Count > 3)
+                    {
+                        <img height="270" width="185" src="~/Images/@futMovies[3].MovieImage" />
+                        <p class="movie-title">@futMovies[3].MovieName - @futMovies[3].StartTime.ToString().Substring(0, 9)</p>
+                    }
+                </a>
+            </div>
+        </div>
+    }
+</div>
+
+
+@{ 
+    // Some Magic :D
+
+    void initialize(bool loadData)
+    {
+        if (!loadData) return;
+
+        DataContext dbContext = new DataContext();
+
+        if (dbContext.Movies.Count() != 0) { return; }
+        
+        dbContext.Database.ExecuteSqlCommand("DELETE FROM Payments");
+        dbContext.Database.ExecuteSqlCommand("DELETE FROM Seats");
+        dbContext.Database.ExecuteSqlCommand("DELETE FROM CarouselMovies");
+        dbContext.Database.ExecuteSqlCommand("DELETE FROM CinemaHalls");
+        dbContext.Database.ExecuteSqlCommand("DELETE FROM Movies");
+        dbContext.Database.ExecuteSqlCommand("DELETE FROM Premieres");
+
+        dbContext.CarouselMovies.Add(new CarouselMovie { MovieURL = "tombraider1.jpeg", MovieDescription = "TombRaider" });
+        dbContext.CarouselMovies.Add(new CarouselMovie { MovieURL = "deadpool1.jpg", MovieDescription = "Deadpool" });
+        dbContext.CarouselMovies.Add(new CarouselMovie { MovieURL = "avengers1.jpg", MovieDescription = "Avengers" });
+        dbContext.CarouselMovies.Add(new CarouselMovie { MovieURL = "harrypotter1.jpg", MovieDescription = "Harry Potter" });
+        dbContext.CarouselMovies.Add(new CarouselMovie { MovieURL = "paddington1.jpg", MovieDescription = "Paddington 2" });
+
+        dbContext.CinemaHalls.Add(new CinemaHall { CinemaHallId = 1, CinemaHallName = "A1", NumberOfSeats = 15 });
+        dbContext.CinemaHalls.Add(new CinemaHall { CinemaHallId = 2, CinemaHallName = "B1", NumberOfSeats = 15 });
+        dbContext.CinemaHalls.Add(new CinemaHall { CinemaHallId = 3, CinemaHallName = "C1", NumberOfSeats = 15 });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 1,
+            MovieName = "Deadpool 2",
+            MovieDescription = "Foul-mouthed mutant mercenary Wade Wilson (AKA. Deadpool), brings together a team of fellow mutant rogues to protect a young boy with supernatural abilities from the brutal, time-traveling cyborg, Cable.",
+            MovieImage = "deadpool2.jpg",
+            StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 22, 0, 0),
+            DurationInMinutes = 119,
+            TicketPrice = 120.00
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 2,
+            MovieName = "Tomb Raider",
+            MovieDescription = "Lara Croft, the fiercely independent daughter of a missing adventurer, must push herself beyond her limits when she discovers the island where her father disappeared.",
+            MovieImage = "tombraider2.jpg",
+            StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 19, 10, 0),
+            DurationInMinutes = 118,
+            TicketPrice = 110.50
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 3,
+            MovieName = "Avengers Infinity War",
+            MovieDescription = "The Avengers and their allies must be willing to sacrifice all in an attempt to defeat the powerful Thanos before his blitz of devastation and ruin puts an end to the universe.",
+            MovieImage = "avengers2.jpg",
+            StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 30, 0),
+            DurationInMinutes = 149,
+            TicketPrice = 130
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 4,
+            MovieName = "Edge Of Tomorrow",
+            MovieDescription = "A soldier fighting aliens gets to relive the same day over and over again, the day restarting every time he dies.",
+            MovieImage = "edge-of-tomorrow1.jpg",
+            StartTime = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 18, 50, 0),
+            DurationInMinutes = 119,
+            TicketPrice = 105.50
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 5,
+            MovieName = "The Foreigner",
+            MovieDescription = "A humble businessman with a buried past seeks justice when his daughter is killed in an act of terrorism. A cat-and-mouse conflict ensues with a government official, whose past may hold clues to the killers' identities.",
+            MovieImage = "foreigner2.jpg",
+            StartTime = new DateTime(2018, 6, 19, 20, 50, 0),
+            DurationInMinutes = 125,
+            TicketPrice = 125
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 6,
+            MovieName = "Solo: A Star Wars Story",
+            MovieDescription = "During an adventure into a dark criminal underworld, Han Solo meets his future copilot Chewbacca and encounters Lando Calrissian years before joining the Rebellion.",
+            MovieImage = "hansolo2.jpg",
+            StartTime = new DateTime(2018, 6, 20, 17, 20, 0),
+            DurationInMinutes = 135,
+            TicketPrice = 115
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 7,
+            MovieName = "Paddington 2",
+            MovieDescription = "Paddington, now happily settled with the Brown family and a popular member of the local community, picks up a series of odd jobs to buy the perfect present for his Aunt Lucy's 100th birthday, only for the gift to be stolen. ",
+            MovieImage = "paddington2.jpg",
+            StartTime = new DateTime(2018, 6, 22, 12, 00, 0),
+            DurationInMinutes = 115,
+            TicketPrice = 115
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 8,
+            MovieName = "Jumanji: Welcome to the Jungle",
+            MovieDescription = "Four teenagers are sucked into a magical video game, and the only way they can escape is to work together to finish the game.",
+            MovieImage = "jumanji2.jpg",
+            StartTime = new DateTime(2018, 6, 23, 15, 00, 0),
+            DurationInMinutes = 119,
+            TicketPrice = 123
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 9,
+            MovieName = "Coco",
+            MovieDescription = "Aspiring musician Miguel, confronted with his family's ancestral ban on music, enters the Land of the Dead to find his great-great-grandfather, a legendary singer. ",
+            MovieImage = "coco2.jpg",
+            StartTime = new DateTime(2018, 6, 24, 12, 30, 0),
+            DurationInMinutes = 105,
+            TicketPrice = 120
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 10,
+            MovieName = "The Witch",
+            MovieDescription = "A family in 1630s New England is torn apart by the forces of witchcraft, black magic and possession. ",
+            MovieImage = "witch2.jpg",
+            StartTime = new DateTime(2018, 6, 24, 22, 30, 0),
+            DurationInMinutes = 92,
+            TicketPrice = 120
+        });
+
+        dbContext.Movies.Add(new Movie
+        {
+            MovieId = 11,
+            MovieName = "Maze Runner: The Scorch Trials",
+            MovieDescription = "Young hero Thomas embarks on a mission to find a cure for a deadly disease known as 'The Flare'.",
+            MovieImage = "mazerunner2.jpg",
+            StartTime = new DateTime(2018, 6, 25, 16, 45, 0),
+            DurationInMinutes = 105,
+            TicketPrice = 130
+        });
+
+        dbContext.Premieres.Add(new Premiere { MovieId = 1, CinemaHallId = 1, PremiereDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 22, 0, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 2, CinemaHallId = 2, PremiereDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 19, 10, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 3, CinemaHallId = 1, PremiereDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 15, 30, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 4, CinemaHallId = 3, PremiereDate = new DateTime(DateTime.Now.Year, DateTime.Now.Month, DateTime.Now.Day, 18, 50, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 5, CinemaHallId = 1, PremiereDate = new DateTime(2018, 6, 19, 20, 50, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 6, CinemaHallId = 1, PremiereDate = new DateTime(2018, 6, 20, 17, 20, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 7, CinemaHallId = 2, PremiereDate = new DateTime(2018, 6, 22, 12, 00, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 8, CinemaHallId = 1, PremiereDate = new DateTime(2018, 6, 23, 15, 00, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 9, CinemaHallId = 3, PremiereDate = new DateTime(2018, 6, 24, 12, 30, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 10, CinemaHallId = 2, PremiereDate = new DateTime(2018, 6, 24, 22, 30, 0) });
+        dbContext.Premieres.Add(new Premiere { MovieId = 11, CinemaHallId = 1, PremiereDate = new DateTime(2018, 6, 25, 16, 45, 0) });
+
+        dbContext.SaveChanges();
+
+        foreach (Premiere premiere in dbContext.Premieres)
+            for (int row = 1; row <= 3; row++)
+                for (int column = 1; column <= 5; column++)
+                    dbContext.Seats.Add(new Seat { PremiereId = premiere.PremiereId, SeatRow = row, SeatColumn = column, Booked = false });
+
+        dbContext.SaveChanges();
+    }
+}

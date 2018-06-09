@@ -1,0 +1,226 @@
+﻿@using DataModel;
+@using DataModel.PocoClasses;
+
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>@ViewBag.Title - VIA Cinema</title>
+    @Styles.Render("~/Content/css")
+    @Scripts.Render("~/bundles/modernizr")
+    <link href="~/Content/style.css" rel="stylesheet" />
+</head>
+<body class="bg-dark">
+    <div class="navbar navbar-fixed-top navbar-orange">
+        <div class="container">
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle" data-toggle="collapse" data-target=".navbar-collapse">
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a href="#" class="navbar-left"><img src="~/Images/brand.png" height="45" /></a>
+                <!--Html.ActionLink("Button Name", "Index", null, new { class = "navbrand-image" })-->
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li>@Html.ActionLink("Home", "Index", "Home")</li>
+                    <li>@Html.ActionLink("Movies", "Movies", "Movies")</li>
+                    <li>@Html.ActionLink("Promotions", "Promotions", "Movies")</li>
+                    <li>@Html.ActionLink("Contact", "Contact", "Home")</li>
+                </ul>
+                <form class="navbar-form navbar-left">
+                    <div class="input-group">
+                        <input type="text" class="form-control" placeholder="Search">
+                        <div class="input-group-btn">
+                            <button class="btn btn-default" type="submit">
+                                <i class="glyphicon glyphicon-search"></i>
+                            </button>
+                        </div>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+    <div class="container body-content">
+        @RenderBody()
+        <hr />
+        <footer>
+            <p>&copy; @DateTime.Now.Year - VIA Cinema, Developed by: Aleksandar, Oleg, Valentin .NET App</p>
+        </footer>
+    </div>
+
+    @Scripts.Render("~/bundles/jquery")
+    @Scripts.Render("~/bundles/bootstrap")
+    @RenderSection("scripts", required: false)
+
+    <script>
+        $(document).ready(function () {
+            $("#showMore").click(function () {
+
+                $(this).fadeOut(500);
+
+                $(".more_movies")
+                    .css('opacity', 0).slideDown(500) .animate(
+                        { opacity: 1 },
+                        { queue: false, duration: 'slow' }
+                    );
+
+            });
+
+            if (document.URL.includes("?row")) {
+                
+                @{
+                    long row = 0;
+                    long column = 0;
+                    long cardnr = 0;
+                    long cvc = 0;
+                    long tel = 0;
+                    long movieID = 0;
+                    string name ="";
+                    string expDate = "";
+
+                    bool allTheInformationCorrect = true;
+                    bool wrongCardInformation = false;
+                    bool seatBookedAlready = false;
+                }
+                
+                @{ 
+                    try
+                    {
+                        string s = Request.Url.ToString();
+
+                        if (s.Contains("?row"))
+                        {
+
+                            int position = 0;
+
+                            while (s[position] != '?') { position++; }
+
+                            int p = position - 1;
+                            int power = 1;
+
+                            while (s[p] >= '0' && s[p] <= '9') { movieID = (s[p] - 48) * power + movieID; p--; power *= 10; }
+
+                            position = getPositionOfNextEqualSign(s, position);
+
+                            row = getNextInt(s, position); position = getPositionOfNextEqualSign(s, position);
+                            column = getNextInt(s, position); position = getPositionOfNextEqualSign(s, position);
+                            cardnr = getNextInt(s, position); position = getPositionOfNextEqualSign(s, position);
+                            name = getNextWord(s, position); position = getPositionOfNextEqualSign(s, position);
+                            expDate = getNextWord(s, position); position = getPositionOfNextEqualSign(s, position);
+                            cvc = getNextInt(s, position); position = getPositionOfNextEqualSign(s, position);
+                            tel = getNextInt(s, position);
+
+                            if (name.Length < 5 || expDate.Length != 10) { throw new Exception(); }
+
+                            if (cvc < 100 || cvc > 999) { wrongCardInformation = true; }
+                            if (cardnr < 100000000000000L || cardnr > 9999999999999999L) { wrongCardInformation = true;  }
+
+                            if (wrongCardInformation) { throw new Exception(); }
+
+                            DataContext dataContext = new DataContext();
+
+                            Premiere premiere = (from c in dataContext.Premieres
+                                                 where c.MovieId == movieID
+                                                 select c).ToList()[0];
+
+                            List<Seat> seats = (from c in dataContext.Seats
+                                                where c.PremiereId == premiere.PremiereId
+                                                select c).ToList();
+
+                            int seatID = 0;
+                            Seat choosenSeat = null;
+
+                            foreach (Seat seat in seats)
+                            {
+                                if (seat.SeatRow == row && seat.SeatColumn == column && seat.Booked)
+                                {
+                                    seatBookedAlready = true; break;
+                                } else
+                                if (seat.SeatRow == row && seat.SeatColumn == column)
+                                {
+                                    seatID = seat.SeatId; choosenSeat = seat; break;
+                                }
+                            }
+                            
+                            if (seatBookedAlready) { throw new Exception(); }
+
+                            choosenSeat.Booked = true;
+
+                            Payment payment = new Payment { SeatId = seatID, ClientEmailAddress = "no@gmail.com", ClientName = name, ClientPhoneNumber = tel };
+
+                            dataContext.Payments.Add(payment);
+                            dataContext.SaveChanges();
+                        }
+                    }
+                    catch(Exception)
+                    {
+                        allTheInformationCorrect = false;
+                    }
+                }
+
+                @if (!allTheInformationCorrect)
+                {
+                    if (!wrongCardInformation && !seatBookedAlready) { TempData["error_message"] = "Incorrent information inserted :("; }
+                    else
+                        if (wrongCardInformation) { TempData["error_message"] = "Incorrect card information :("; }
+                    else
+                    {
+
+                        TempData["error_message"] = "Seat already booked, please choose another one :(";
+                    }
+                }
+                else
+                {
+                    TempData["error_message"] = "Seat booked, thank you for seeing movies in our cinema ;)";
+                }
+
+                alert("@TempData["error_message"]");
+
+                @{
+
+                    int getPositionOfNextEqualSign(string ss, int pos)
+                    {
+                        pos++;
+
+                        while (ss[pos] != '=') pos++;
+
+                        return pos + 1;
+                    }
+
+                    long getNextInt(string ss, int pos)
+                    {
+                        long x = 0;
+
+                        while (pos < ss.Length && ss[pos] >= '0' && ss[pos] <= '9')
+                        {
+                            x = x * 10 + ss[pos] - 48;
+                            pos++;
+                        }
+
+                        return x;
+                    }
+
+                    string getNextWord(string ss, int pos)
+                    {
+                        string ans = "";
+
+                        while (pos < ss.Length && ss[pos] != '&')
+                        {
+                            ans += ss[pos];
+                            pos++;
+                        }
+
+                        return ans;
+                    }
+
+                }
+
+            }
+        });
+
+    </script>
+</body>
+</html>
